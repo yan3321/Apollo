@@ -1,8 +1,15 @@
 import { rewriteFramesIntegration } from "@sentry/integrations";
 import * as sentry from "@sentry/node";
-import Environment from "./environment";
+import Environment from "./environment.js";
 
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
 const { name, version } = require("../package.json");
+
+import path from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
+const __dirname = path.dirname(__filename); // get the name of the directory
 
 export default class Sentry {
     public static init() {

@@ -1,35 +1,48 @@
-import * as discord from "discord.js";
+import {
+    ActivityType,
+    Client,
+    Collection,
+    EmbedBuilder,
+    GuildMember,
+    Message,
+    MessageReaction,
+    Partials,
+    Role,
+    Snowflake,
+    TextChannel,
+    User,
+} from "discord.js";
 import { Player, QueryResult } from "gamedig";
-import Environment, { IColors } from "./environment";
-import Locale from "./locale";
-import Time from "./time";
+import Environment, { IColors } from "./environment.js";
+import Locale from "./locale.js";
+import Time from "./time.js";
 
 export default class Discord {
     // tslint:disable-next-line: variable-name
-    private _client: discord.Client;
+    private _client: Client;
     private locale: Locale;
 
     private loginInterval?: NodeJS.Timeout;
-    private reaction?: discord.MessageReaction;
+    private reaction?: MessageReaction;
 
-    public get client(): discord.Client {
+    public get client(): Client {
         return this._client;
     }
 
-    private get channel(): discord.TextChannel | undefined {
+    private get channel(): TextChannel | undefined {
         return this._client.channels.cache.get(
             Environment.get("channel_id")
-        ) as discord.TextChannel;
+        ) as TextChannel;
     }
 
     constructor(secret: string) {
-        this._client = new discord.Client({
+        this._client = new Client({
             partials: [
-                discord.Partials.Reaction,
-                discord.Partials.Message,
-                discord.Partials.Channel,
-                discord.Partials.GuildMember,
-                discord.Partials.User,
+                Partials.Reaction,
+                Partials.Message,
+                Partials.Channel,
+                Partials.GuildMember,
+                Partials.User,
             ],
             intents: [
                 "DirectMessages",
@@ -70,7 +83,7 @@ export default class Discord {
         maintenanceMode?: boolean
     ) {
         if (query) {
-            return new discord.EmbedBuilder({
+            return new EmbedBuilder({
                 color: await this.getColor("ok"),
                 // As the ─ is just a little larger than the actual letters, it isn't equal to the letter count
                 description: this.getDescriptionRepeater(query.name),
@@ -79,7 +92,7 @@ export default class Discord {
                 title: query.name,
             });
         } else if (maintenanceMode) {
-            return new discord.EmbedBuilder({
+            return new EmbedBuilder({
                 color: await this.getColor("maintenance"),
                 description: this.getDescriptionRepeater(
                     this.locale.serverDownForMaintenance
@@ -89,7 +102,7 @@ export default class Discord {
                 title: this.locale.serverDownForMaintenance,
             });
         } else {
-            return new discord.EmbedBuilder({
+            return new EmbedBuilder({
                 color: await this.getColor("error"),
                 description: this.getDescriptionRepeater(
                     this.locale.serverOffline
@@ -117,7 +130,7 @@ export default class Discord {
                     activities: [
                         {
                             name,
-                            type: discord.ActivityType.Playing,
+                            type: ActivityType.Playing,
                         },
                     ],
                     status: "online",
@@ -129,7 +142,7 @@ export default class Discord {
                     activities: [
                         {
                             name: this.locale.presence.error,
-                            type: discord.ActivityType.Watching,
+                            type: ActivityType.Watching,
                         },
                     ],
                     status: "dnd",
@@ -141,7 +154,7 @@ export default class Discord {
                     activities: [
                         {
                             name: this.locale.presence.maintenance,
-                            type: discord.ActivityType.Watching,
+                            type: ActivityType.Watching,
                         },
                     ],
                 });
@@ -152,7 +165,7 @@ export default class Discord {
                     activities: [
                         {
                             name: this.locale.presence.botFailure,
-                            type: discord.ActivityType.Streaming,
+                            type: ActivityType.Streaming,
                         },
                     ],
                     status: "idle",
@@ -161,9 +174,7 @@ export default class Discord {
         }
     }
 
-    public postMessage(
-        content: discord.EmbedBuilder | string
-    ): Promise<string> {
+    public postMessage(content: EmbedBuilder | string): Promise<string> {
         return new Promise((resolve, reject) => {
             if (this.channel) {
                 this.channel
@@ -188,7 +199,7 @@ export default class Discord {
 
     public editMessage(
         messageId: string,
-        embed: discord.EmbedBuilder
+        embed: EmbedBuilder
     ): Promise<string> {
         return new Promise((resolve, reject) => {
             if (this.channel) {
@@ -207,7 +218,7 @@ export default class Discord {
         });
     }
 
-    public deleteMessage(messageId: string): Promise<discord.Message> {
+    public deleteMessage(messageId: string): Promise<Message> {
         return new Promise((resolve, reject) => {
             if (this.channel) {
                 this.channel.messages
@@ -234,7 +245,7 @@ export default class Discord {
 
     public stopThinking(): void {
         if (this.channel) {
-            this.channel.sendTyping();
+            // this.channel.sendTyping();
         } else {
             return console.error("Channel does not exist.");
         }
@@ -246,7 +257,7 @@ export default class Discord {
 
     public getAllRoles(
         guildId: string
-    ): discord.Collection<discord.Snowflake, discord.Role> | undefined {
+    ): Collection<Snowflake, Role> | undefined {
         const guild = this._client.guilds.cache.get(guildId);
 
         if (guild) {
@@ -256,10 +267,10 @@ export default class Discord {
         }
     }
 
-    public getRolesAboveOrSame(role: discord.Role): discord.Role[] {
+    public getRolesAboveOrSame(role: Role): Role[] {
         const allRoles = this.getAllRoles(role.guild.id);
 
-        const roles: discord.Role[] = [];
+        const roles: Role[] = [];
 
         if (allRoles) {
             allRoles.forEach((dRole) => {
@@ -274,10 +285,7 @@ export default class Discord {
         return roles;
     }
 
-    public doesUserHaveRoles(
-        member: discord.GuildMember,
-        roles: discord.Role[]
-    ): boolean {
+    public doesUserHaveRoles(member: GuildMember, roles: Role[]): boolean {
         let hasRole = false;
 
         roles.forEach((role) => {
@@ -289,7 +297,7 @@ export default class Discord {
         return hasRole;
     }
 
-    public addRoleToUser(user: discord.User, role: discord.Role | string) {
+    public addRoleToUser(user: User, role: Role | string) {
         const guild = this._client.guilds.cache.first();
 
         if (guild === undefined) {
@@ -303,9 +311,7 @@ export default class Discord {
         }
     }
 
-    public doesUserHaveServerManagerPermissions(
-        member: discord.GuildMember
-    ): boolean {
+    public doesUserHaveServerManagerPermissions(member: GuildMember): boolean {
         const roles = this.getAllRoles(member.guild.id);
 
         if (roles) {
@@ -380,9 +386,16 @@ export default class Discord {
             const message = await this.channel.messages.fetch(reactionId);
 
             if (message) {
-                this.reaction = await message.react(
-                    Environment.get<string>("reaction_emoji", "string", false)
-                );
+                const react = message.react;
+                if (react) {
+                    this.reaction = await react(
+                        Environment.get<string>(
+                            "reaction_emoji",
+                            "string",
+                            false
+                        )
+                    );
+                }
             }
         } else {
             console.warn(`Channel does not exist.`);
@@ -490,7 +503,8 @@ export default class Discord {
     }
 
     private getPlayerDisplayText(player: Player): string {
-        return `• ${player.name} (${Time.secondsToHhMm(player.time)})`;
+        const time: number | undefined = (player as any).time;
+        return `• ${player.name} ${time && `(${Time.secondsToHhMm(time)})`}`;
     }
 
     private getPlayerListCharacterCount(players: Player[]): number {
@@ -509,7 +523,7 @@ export default class Discord {
         ) {
             // Sort alphabetically
             query.players.sort((a, b) =>
-                a.name > b.name ? 1 : b.name > a.name ? -1 : 0
+                a.name! > b.name! ? 1 : b.name! > a.name! ? -1 : 0
             );
 
             query.players.forEach((player) => {
@@ -523,40 +537,44 @@ export default class Discord {
 
         playerListData.push("```");
 
-        return [
-            {
-                inline: false,
-                name: this.locale.statuses.status,
-                value: this.locale.statuses.online,
-            },
-            {
-                inline: false,
-                name: this.locale.address,
-                value: `steam://connect/${Environment.get(
-                    "display_ip"
-                )}:${Environment.get("port")}`,
-            },
-            {
-                inline: false,
-                name: this.locale.map,
-                value: query.map ? query.map : this.locale.noMap,
-            },
-            {
-                inline: false,
-                name: this.locale.mission,
-                value: query.raw.game,
-            },
-            {
-                inline: false,
-                name: this.locale.playerCount,
-                value: `${query.players.length}/${query.maxplayers}`,
-            },
-            {
-                inline: false,
-                name: this.locale.playerList,
-                value: playerListData.join("\n"),
-            },
-        ];
+        const locale = this.locale;
+        if (locale) {
+            return [
+                {
+                    inline: false,
+                    name: locale.statuses.status,
+                    value: locale.statuses.online,
+                },
+                {
+                    inline: false,
+                    name: locale.address,
+                    value: `steam://connect/${Environment.get(
+                        "display_ip"
+                    )}:${Environment.get("port")}`,
+                },
+                {
+                    inline: false,
+                    name: locale.map,
+                    value: query.map ? query.map : this.locale.noMap,
+                },
+                {
+                    inline: false,
+                    name: locale.mission,
+                    value: (query.raw as any).game,
+                },
+                {
+                    inline: false,
+                    name: locale.playerCount,
+                    value: `${query.players.length}/${query.maxplayers}`,
+                },
+                {
+                    inline: false,
+                    name: locale.playerList,
+                    value: playerListData.join("\n"),
+                },
+            ];
+        }
+        return [];
     }
 }
 

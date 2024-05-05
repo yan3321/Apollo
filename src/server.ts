@@ -1,4 +1,4 @@
-import * as gamedig from 'gamedig';
+import { GameDig, type QueryResult } from "gamedig";
 
 export default class Server {
     public query?: gamedig.QueryResult;
@@ -11,21 +11,21 @@ export default class Server {
         this.port = port;
     }
 
-    public queryServer(): Promise<gamedig.QueryResult | undefined> {
-        return new Promise(resolve => {
-            gamedig.query({
+    public queryServer(): Promise<QueryResult | undefined> {
+        return new Promise((resolve) => {
+            GameDig.query({
                 host: this.ip,
                 port: this.port,
-                type: 'arma3',
+                type: "arma3",
             })
-            .then(query => {
-                this.query = query;
-                resolve(query);
-            })
-            .catch(error => {
-                console.warn(error);
-                resolve(undefined);
-            });
+                .then((query) => {
+                    this.query = query;
+                    resolve(query);
+                })
+                .catch((error) => {
+                    console.warn(error);
+                    resolve(undefined);
+                });
         });
     }
 }

@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
-        "module": "nodenext",
-        "target": "es6",
+        "module": "NodeNext",
+        "target": "ESNext",
         "noImplicitAny": true,
         "strict": true,
         "sourceMap": true,
@@ -9,6 +9,7 @@
         "sourceRoot": "/",
         "resolveJsonModule": true,
         "skipLibCheck": true,
+        "esModuleInterop": true,
         "outDir": "dist",
         "baseUrl": ".",
         "paths": {

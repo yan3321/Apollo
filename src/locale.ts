@@ -14,7 +14,7 @@ export default interface ILocale {
     playerList: string;
     presence: {
         botFailure: string;
-        ok: string,
+        ok: string;
         error: string;
         maintenance: string;
     };
@@ -28,9 +28,9 @@ export default interface ILocale {
     };
     serverOffline: string;
     statuses: {
-        offline: string,
-        online: string,
-        status: string,
+        offline: string;
+        online: string;
+        status: string;
     };
     tooManyPlayers: string;
 }

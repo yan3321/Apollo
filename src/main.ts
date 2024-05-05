@@ -1,8 +1,8 @@
-import Bot from './bot';
-import Environment from './environment';
-import Sentry from './sentry';
+import Bot from "./bot.js";
+import Environment from "./environment.js";
+import Sentry from "./sentry.js";
 
-if (Environment.get('sentry_dsn', 'string', true)) {
+if (Environment.get("sentry_dsn", "string", true)) {
     Sentry.init();
 }
 
